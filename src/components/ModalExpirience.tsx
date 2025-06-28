@@ -49,6 +49,7 @@ const ModalExperience: React.FC<Props> = ({ expModal, setExpModal }) => {
             onSubmit={handleSubmit((data) => {
               localStorage.setItem("expirience", JSON.stringify(data));
               reset();
+              setExpModal(false)
             })}
           >
             {/* Поле должности */}

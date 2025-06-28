@@ -50,6 +50,7 @@ const ModalSkills: React.FC<Props> = ({ skillsModal, setSkillsModal }) => {
             onSubmit={handleSubmit((data) => {
               localStorage.setItem("skills", JSON.stringify(data));
               reset();
+              setSkillsModal(false);
             })}
           >
             {/* Название навыка */}

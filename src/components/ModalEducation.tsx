@@ -50,6 +50,7 @@ const ModalEducation: React.FC<Props> = ({ eduModal, setEduModal }) => {
             onSubmit={handleSubmit((data) => {
               localStorage.setItem("education", JSON.stringify(data));
               reset();
+              setEduModal(false);
             })}
           >
             {/* Поле ввода с фокус-эффектом */}

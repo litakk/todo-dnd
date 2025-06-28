@@ -48,6 +48,7 @@ const ModalAboutPerson: React.FC<Props> = ({ aboutModal, setAboutModal }) => {
             onSubmit={handleSubmit((data) => {
               localStorage.setItem("about-me", JSON.stringify(data));
               reset();
+              setAboutModal(false);
             })}
           >
             {/* Основное поле "О себе" */}
