@@ -23,7 +23,7 @@ export default function BasicSelect() {
 
   return (
     <>
-      <Box sx={{ minWidth: 250 }}>
+      <Box sx={{ width: 220 }}>
         <FormControl fullWidth>
           <InputLabel id="section-select-label">Добавить секцию</InputLabel>
           <Select
