@@ -1,4 +1,3 @@
-import * as React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -15,7 +14,9 @@ import { useState, useCallback, useEffect } from "react";
 
 const drawerWidth = 440;
 
-function getAllSectionData() {
+type SectionKey = "expirience" | "education" | "skills" | "about-me";
+
+function getAllSectionData(): Record<SectionKey, any> {
   return {
     expirience: JSON.parse(localStorage.getItem("expirience") || "null"),
     education: JSON.parse(localStorage.getItem("education") || "null"),
@@ -24,47 +25,42 @@ function getAllSectionData() {
   };
 }
 
-function getOrderFromStorage() {
+function getOrderFromStorage(): SectionKey[] {
   const order = localStorage.getItem("resume-section-order");
   if (order) {
     try {
       const arr = JSON.parse(order);
       if (Array.isArray(arr) && arr.every((k) => typeof k === "string")) {
-        return arr;
+        return arr.filter((k) =>
+          ["expirience", "education", "skills", "about-me"].includes(k)
+        ) as SectionKey[];
       }
     } catch {}
   }
   return ["expirience", "education", "skills", "about-me"];
 }
 
-export default function ResponsiveDrawer(props: any) {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [isClosing, setIsClosing] = React.useState(false);
-  const [order, setOrder] = useState<string[]>(getOrderFromStorage());
-  const [data, setData] = useState(getAllSectionData());
+export default function ResponsiveDrawer() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [order, setOrder] = useState<SectionKey[]>(getOrderFromStorage());
+  const [data, setData] = useState<Record<SectionKey, any>>(
+    getAllSectionData()
+  );
+
   const reload = useCallback(() => setData(getAllSectionData()), []);
+
   useEffect(() => {
     const handler = () => reload();
     window.addEventListener("resume-data-updated", handler);
     return () => window.removeEventListener("resume-data-updated", handler);
   }, [reload]);
+
   useEffect(() => {
     localStorage.setItem("resume-section-order", JSON.stringify(order));
   }, [order]);
 
-  const handleDrawerClose = () => {
-    setIsClosing(true);
-    setMobileOpen(false);
-  };
-
-  const handleDrawerTransitionEnd = () => {
-    setIsClosing(false);
-  };
-
   const handleDrawerToggle = () => {
-    if (!isClosing) {
-      setMobileOpen(!mobileOpen);
-    }
+    setMobileOpen(!mobileOpen);
   };
 
   const drawer = (
@@ -78,6 +74,13 @@ export default function ResponsiveDrawer(props: any) {
       <Alldata order={order} setOrder={setOrder} data={data} reload={reload} />
     </div>
   );
+
+  const sectionTitles: Record<SectionKey, string> = {
+    expirience: "Опыт работы",
+    education: "Образование",
+    skills: "Навыки",
+    "about-me": "О себе",
+  };
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -107,7 +110,7 @@ export default function ResponsiveDrawer(props: any) {
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
+        aria-label="resume sections"
       >
         <Drawer
           variant="permanent"
@@ -132,9 +135,7 @@ export default function ResponsiveDrawer(props: any) {
         }}
       >
         <Toolbar />
-        {/* Preview блока резюме справа */}
         <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-200 p-10 min-h-[600px] print:border-0 print:shadow-none print:p-0">
-          {/* Имя и контакты */}
           <div className="border-b-2 border-blue-600 mb-10 pb-4">
             <div className="text-4xl font-bold tracking-wide text-blue-700">
               Иван Иванов
@@ -143,16 +144,10 @@ export default function ResponsiveDrawer(props: any) {
               Москва, example@mail.ru, +7 999 123-45-67
             </div>
           </div>
-          {/* Секции */}
           {order.map((key) => {
-            const sectionTitles: any = {
-              expirience: "Опыт работы",
-              education: "Образование",
-              skills: "Навыки",
-              "about-me": "О себе",
-            };
             const sectionData = data[key];
             if (!sectionData) return null;
+
             return (
               <div key={key} className="mb-10">
                 <div className="text-xl font-semibold text-blue-700 mb-3 border-l-4 border-blue-600 pl-3">

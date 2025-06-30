@@ -15,7 +15,9 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-const SECTION_META = {
+export type SectionKey = "expirience" | "education" | "skills" | "about-me";
+
+const SECTION_META: Record<SectionKey, { id: SectionKey; title: string }> = {
   expirience: { id: "expirience", title: "Опыт работы" },
   education: { id: "education", title: "Образование" },
   skills: { id: "skills", title: "Навыки" },
@@ -30,9 +32,9 @@ export interface SectionData {
 }
 
 interface AlldataProps {
-  order: string[];
-  setOrder: (order: string[]) => void;
-  data: SectionData;
+  order: SectionKey[];
+  setOrder: (order: SectionKey[]) => void;
+  data: Record<SectionKey, any>;
   reload: () => void;
 }
 
@@ -42,8 +44,8 @@ function SortableSection({
   sectionData,
   onDelete,
 }: {
-  id: string;
-  section: { id: string; title: string };
+  id: SectionKey;
+  section: { id: SectionKey; title: string };
   sectionData: any;
   onDelete: () => void;
 }) {
@@ -164,16 +166,16 @@ export default function Alldata({
         onDragEnd={(e) => {
           const { active, over } = e;
           if (active.id !== over?.id) {
-            const oldIndex = order.indexOf(active.id as string);
-            const newIndex = order.indexOf(over?.id as string);
+            const oldIndex = order.indexOf(active.id as SectionKey);
+            const newIndex = order.indexOf(over?.id as SectionKey);
             setOrder(arrayMove(order, oldIndex, newIndex));
           }
         }}
       >
         <SortableContext items={order} strategy={verticalListSortingStrategy}>
           {order.map((key) => {
-            const section = SECTION_META[key as keyof typeof SECTION_META];
-            const sectionData = data[key as keyof SectionData];
+            const section = SECTION_META[key];
+            const sectionData = data[key];
             return (
               <SortableSection
                 key={key}
