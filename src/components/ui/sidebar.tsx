@@ -9,24 +9,48 @@ import List from "@mui/material/List";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-
 import Select from "./select";
 import Alldata from "../Alldata";
+import { useState, useCallback, useEffect } from "react";
 
 const drawerWidth = 440;
 
-interface Props {
-  /**
-   * Injected by the documentation to work in an iframe.
-   * Remove this when copying and pasting into your project.
-   */
-  window?: () => Window;
+function getAllSectionData() {
+  return {
+    expirience: JSON.parse(localStorage.getItem("expirience") || "null"),
+    education: JSON.parse(localStorage.getItem("education") || "null"),
+    skills: JSON.parse(localStorage.getItem("skills") || "null"),
+    "about-me": JSON.parse(localStorage.getItem("about-me") || "null"),
+  };
 }
 
-export default function ResponsiveDrawer(props: Props) {
-  const { window } = props;
+function getOrderFromStorage() {
+  const order = localStorage.getItem("resume-section-order");
+  if (order) {
+    try {
+      const arr = JSON.parse(order);
+      if (Array.isArray(arr) && arr.every((k) => typeof k === "string")) {
+        return arr;
+      }
+    } catch {}
+  }
+  return ["expirience", "education", "skills", "about-me"];
+}
+
+export default function ResponsiveDrawer(props: any) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
+  const [order, setOrder] = useState<string[]>(getOrderFromStorage());
+  const [data, setData] = useState(getAllSectionData());
+  const reload = useCallback(() => setData(getAllSectionData()), []);
+  useEffect(() => {
+    const handler = () => reload();
+    window.addEventListener("resume-data-updated", handler);
+    return () => window.removeEventListener("resume-data-updated", handler);
+  }, [reload]);
+  useEffect(() => {
+    localStorage.setItem("resume-section-order", JSON.stringify(order));
+  }, [order]);
 
   const handleDrawerClose = () => {
     setIsClosing(true);
@@ -51,15 +75,9 @@ export default function ResponsiveDrawer(props: Props) {
         <Select />
       </List>
       <Divider />
-      <List>
-        <Alldata />
-      </List>
+      <Alldata order={order} setOrder={setOrder} data={data} reload={reload} />
     </div>
   );
-
-  // Remove this const when copying and pasting into your project.
-  const container =
-    window !== undefined ? () => window().document.body : undefined;
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -91,28 +109,6 @@ export default function ResponsiveDrawer(props: Props) {
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
         aria-label="mailbox folders"
       >
-        {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-        <Drawer
-          container={container}
-          variant="temporary"
-          open={mobileOpen}
-          onTransitionEnd={handleDrawerTransitionEnd}
-          onClose={handleDrawerClose}
-          sx={{
-            display: { xs: "block", sm: "none" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-          slotProps={{
-            root: {
-              keepMounted: true, // Better open performance on mobile.
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
         <Drawer
           variant="permanent"
           sx={{
@@ -136,35 +132,99 @@ export default function ResponsiveDrawer(props: Props) {
         }}
       >
         <Toolbar />
-        <Typography sx={{ marginBottom: 2 }}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Rhoncus
-          dolor purus non enim praesent elementum facilisis leo vel. Risus at
-          ultrices mi tempus imperdiet. Semper risus in hendrerit gravida rutrum
-          quisque non tellus. Convallis convallis tellus id interdum velit
-          laoreet id donec ultrices. Odio morbi quis commodo odio aenean sed
-          adipiscing. Amet nisl suscipit adipiscing bibendum est ultricies
-          integer quis. Cursus euismod quis viverra nibh cras. Metus vulputate
-          eu scelerisque felis imperdiet proin fermentum leo. Mauris commodo
-          quis imperdiet massa tincidunt. Cras tincidunt lobortis feugiat
-          vivamus at augue. At augue eget arcu dictum varius duis at consectetur
-          lorem. Velit sed ullamcorper morbi tincidunt. Lorem donec massa sapien
-          faucibus et molestie ac.
-        </Typography>
-        <Typography sx={{ marginBottom: 2 }}>
-          Consequat mauris nunc congue nisi vitae suscipit. Fringilla est
-          ullamcorper eget nulla facilisi etiam dignissim diam. Pulvinar
-          elementum integer enim neque volutpat ac tincidunt. Ornare suspendisse
-          sed nisi lacus sed viverra tellus. Purus sit amet volutpat consequat
-          mauris. Elementum eu facilisis sed odio morbi. Euismod lacinia at quis
-          risus sed vulputate odio. Morbi tincidunt ornare massa eget egestas
-          purus viverra accumsan in. In hendrerit gravida rutrum quisque non
-          tellus orci ac. Pellentesque nec nam aliquam sem et tortor. Habitant
-          morbi tristique senectus et. Adipiscing elit duis tristique
-          sollicitudin nibh sit. Ornare aenean euismod elementum nisi quis
-          eleifend. Commodo viverra maecenas accumsan lacus vel facilisis. Nulla
-          posuere sollicitudin aliquam ultrices sagittis orci a.
-        </Typography>
+        {/* Preview блока резюме справа */}
+        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl border border-gray-200 p-10 min-h-[600px] print:border-0 print:shadow-none print:p-0">
+          {/* Имя и контакты */}
+          <div className="border-b-2 border-blue-600 mb-10 pb-4">
+            <div className="text-4xl font-bold tracking-wide text-blue-700">
+              Иван Иванов
+            </div>
+            <div className="text-base text-gray-500 mt-2">
+              Москва, example@mail.ru, +7 999 123-45-67
+            </div>
+          </div>
+          {/* Секции */}
+          {order.map((key) => {
+            const sectionTitles: any = {
+              expirience: "Опыт работы",
+              education: "Образование",
+              skills: "Навыки",
+              "about-me": "О себе",
+            };
+            const sectionData = data[key];
+            if (!sectionData) return null;
+            return (
+              <div key={key} className="mb-10">
+                <div className="text-xl font-semibold text-blue-700 mb-3 border-l-4 border-blue-600 pl-3">
+                  {sectionTitles[key]}
+                </div>
+                <div className="space-y-1 text-gray-800 text-base">
+                  {key === "expirience" && (
+                    <>
+                      <div>
+                        <span className="font-medium">Должность:</span>{" "}
+                        {sectionData["должность"]}
+                      </div>
+                      <div>
+                        <span className="font-medium">Компания:</span>{" "}
+                        {sectionData["компания"]}
+                      </div>
+                      <div>
+                        <span className="font-medium">Период:</span>{" "}
+                        {sectionData["начало"]} — {sectionData["конец"]}
+                      </div>
+                    </>
+                  )}
+                  {key === "education" && (
+                    <>
+                      <div>
+                        <span className="font-medium">Учебное заведение:</span>{" "}
+                        {sectionData["учебное заведение"]}
+                      </div>
+                      <div>
+                        <span className="font-medium">Специальность:</span>{" "}
+                        {sectionData["специальность"]}
+                      </div>
+                      <div>
+                        <span className="font-medium">Годы обучения:</span>{" "}
+                        {sectionData["год начала"]} —{" "}
+                        {sectionData["год окончания"]}
+                      </div>
+                    </>
+                  )}
+                  {key === "skills" && (
+                    <>
+                      <div>
+                        <span className="font-medium">Навык:</span>{" "}
+                        {sectionData["skill"]}
+                      </div>
+                      <div>
+                        <span className="font-medium">Уровень:</span>{" "}
+                        {sectionData["level"]}
+                      </div>
+                    </>
+                  )}
+                  {key === "about-me" && (
+                    <>
+                      <div>
+                        <span className="font-medium">Описание:</span>{" "}
+                        {sectionData["aboutPerson"]}
+                      </div>
+                      <div>
+                        <span className="font-medium">Языки:</span>{" "}
+                        {sectionData["language"]}
+                      </div>
+                      <div>
+                        <span className="font-medium">Местоположение:</span>{" "}
+                        {sectionData["location"]}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </Box>
     </Box>
   );
