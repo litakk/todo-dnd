@@ -13,7 +13,7 @@ import Typography from "@mui/material/Typography";
 import Select from "./select";
 import Alldata from "../Alldata";
 
-const drawerWidth = 240;
+const drawerWidth = 440;
 
 interface Props {
   /**
