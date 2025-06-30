@@ -49,6 +49,9 @@ const ModalEducation: React.FC<Props> = ({ eduModal, setEduModal }) => {
             className="space-y-4"
             onSubmit={handleSubmit((data) => {
               localStorage.setItem("education", JSON.stringify(data));
+              window.dispatchEvent(new Event("resume-data-updated"));
+              console.log("dispatching resume-data-updated");
+
               reset();
               setEduModal(false);
             })}

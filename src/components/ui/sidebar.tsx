@@ -11,6 +11,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 
 import Select from "./select";
+import Alldata from "../Alldata";
 
 const drawerWidth = 240;
 
@@ -50,7 +51,9 @@ export default function ResponsiveDrawer(props: Props) {
         <Select />
       </List>
       <Divider />
-      <List></List>
+      <List>
+        <Alldata />
+      </List>
     </div>
   );
 

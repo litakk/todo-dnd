@@ -47,6 +47,9 @@ const ModalAboutPerson: React.FC<Props> = ({ aboutModal, setAboutModal }) => {
             className="space-y-5"
             onSubmit={handleSubmit((data) => {
               localStorage.setItem("about-me", JSON.stringify(data));
+              window.dispatchEvent(new Event("resume-data-updated"));
+              console.log("dispatching resume-data-updated");
+
               reset();
               setAboutModal(false);
             })}

@@ -48,8 +48,10 @@ const ModalExperience: React.FC<Props> = ({ expModal, setExpModal }) => {
             className="space-y-4"
             onSubmit={handleSubmit((data) => {
               localStorage.setItem("expirience", JSON.stringify(data));
+              window.dispatchEvent(new Event("resume-data-updated"));
+              console.log("dispatching resume-data-updated");
               reset();
-              setExpModal(false)
+              setExpModal(false);
             })}
           >
             {/* Поле должности */}

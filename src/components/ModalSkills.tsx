@@ -49,6 +49,8 @@ const ModalSkills: React.FC<Props> = ({ skillsModal, setSkillsModal }) => {
             className="space-y-5"
             onSubmit={handleSubmit((data) => {
               localStorage.setItem("skills", JSON.stringify(data));
+              window.dispatchEvent(new Event("resume-data-updated"));
+              console.log("dispatching resume-data-updated");
               reset();
               setSkillsModal(false);
             })}
